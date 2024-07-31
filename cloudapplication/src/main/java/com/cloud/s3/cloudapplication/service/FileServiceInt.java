@@ -8,5 +8,5 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public interface FileServiceInt {
     File cadastrar(MultipartFile multipartFile, Integer id);
-    String getFile(Integer id);
+    String getFile(Integer idTask, Integer idFile);
 }

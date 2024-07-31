@@ -74,14 +74,15 @@ public class FileService implements FileServiceInt {
     }
 
     @Override
-    public String getFile(Integer id) {
+    public String getFile(Integer idTask, Integer idFile) {
         AWSCredentials credentials = new BasicAWSCredentials(config.getAwsKeyID(), config.getAwsSecretKeyID());
         AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_1).build();
 
         ListObjectsV2Result result = amazonS3.listObjectsV2(config.getAwsBuketName());
         List<S3ObjectSummary> objects = result.getObjectSummaries();
-        File file = taskRepository.findById(1).get().getFiles().get(1);
+        File fileTmp = repository.findById(idFile).get();
+        File file = taskRepository.findById(idTask).get().getFiles().get(fileTmp.getIdFile()-1);
         String urlImage = null;
         for (S3ObjectSummary os : objects) {
             if (file.getRef().equals(os.getKey())) {

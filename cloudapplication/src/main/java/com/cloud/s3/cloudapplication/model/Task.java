@@ -13,5 +13,8 @@ public class Task {
     private Integer idTask;
     @OneToMany(mappedBy = "task")
     private List<File> files;
+    @Column(nullable = false)
     private String nome;
+    @Column(nullable = false)
+    private String titulo;
 }

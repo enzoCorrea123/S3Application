@@ -13,6 +13,7 @@ public class TaskService implements TaskServiceInt{
     @Override
     public Task cadastrar(TaskRequestPostDTO dto) {
         Task task = new Task();
+        task.setTitulo(dto.titulo());
         task.setNome(dto.nome());
         return repository.save(task);
     }

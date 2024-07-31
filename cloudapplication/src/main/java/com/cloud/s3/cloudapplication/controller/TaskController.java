@@ -19,7 +19,7 @@ public class TaskController {
         service.cadastrar(dto);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Task> taskGet(@PathVariable Integer id){
         Task task = service.getTask(id);
         return new ResponseEntity<>(task, HttpStatus.OK);

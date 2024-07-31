@@ -21,8 +21,8 @@ public class FileController {
         File file = service.cadastrar(multipartFile, id);
         return ResponseEntity.ok(file);
     }
-    @GetMapping("/{id}")
-    public ResponseEntity<String> getMethod(@PathVariable Integer id){
-        return ResponseEntity.ok(service.getFile(id));
+    @GetMapping("/{idTask}/{idFile}")
+    public ResponseEntity<String> getMethod(@PathVariable Integer idTask, @PathVariable Integer idFile){
+        return ResponseEntity.ok(service.getFile(idTask, idFile));
     }
 }
