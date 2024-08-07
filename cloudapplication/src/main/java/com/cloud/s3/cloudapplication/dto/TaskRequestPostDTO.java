@@ -3,5 +3,5 @@ package com.cloud.s3.cloudapplication.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-public record TaskRequestPostDTO(String titulo, String nome){
+public record TaskRequestPostDTO(String titulo){
 }

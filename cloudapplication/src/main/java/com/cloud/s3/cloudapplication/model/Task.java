@@ -14,7 +14,5 @@ public class Task {
     @OneToMany(mappedBy = "task")
     private List<File> files;
     @Column(nullable = false)
-    private String nome;
-    @Column(nullable = false)
     private String titulo;
 }

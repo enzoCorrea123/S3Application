@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/file")
 @AllArgsConstructor
+@CrossOrigin("*")
 public class FileController {
     private final FileService service;
     @PostMapping("/{id}")
