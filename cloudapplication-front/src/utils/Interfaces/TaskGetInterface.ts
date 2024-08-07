@@ -1,5 +1,5 @@
 interface TaskGetInterface {
-    id: number;
+    idTask: number;
     files : Array<any>
     titulo: string;
 } 

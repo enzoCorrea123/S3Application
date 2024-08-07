@@ -58,7 +58,10 @@ public class FileService implements FileServiceInt {
                 java.io.File arquivoJava = java.io.File.createTempFile("tmp", multipartFile.getOriginalFilename());
                 multipartFile.transferTo(arquivoJava);
                 amazonS3.putObject(config.getAwsBuketName(), key, arquivoJava);
-
+                List<File> tempFiles = task.getFiles();
+                tempFiles.add(file);
+                task.setFiles(tempFiles);
+                taskRepository.save(task);
                 return repository.save(file);
             } else {
                 throw new RuntimeException("Não entrou no if");

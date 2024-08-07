@@ -11,7 +11,7 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idTask;
-    @OneToMany(mappedBy = "task")
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.PERSIST, mappedBy = "task")
     private List<File> files;
     @Column(nullable = false)
     private String titulo;

@@ -2,10 +2,12 @@ package com.cloud.s3.cloudapplication.service;
 
 import com.cloud.s3.cloudapplication.dto.TaskRequestPostDTO;
 import com.cloud.s3.cloudapplication.model.Task;
+import com.cloud.s3.cloudapplication.repository.FileRepository;
 import com.cloud.s3.cloudapplication.repository.TaskRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,6 +18,7 @@ public class TaskService implements TaskServiceInt{
     public Task cadastrar(TaskRequestPostDTO dto) {
         Task task = new Task();
         task.setTitulo(dto.titulo());
+        task.setFiles(new ArrayList<>());
         return repository.save(task);
     }
 

@@ -10,7 +10,7 @@ export default function Home() {
   const [tasks, setTasks] = useState<Array<TaskGetInterface>>();
   const postTask = async (data: FormData) => {
     const taskDto = {
-      titulo: data.get("titulo")
+      titulo: data.get("titulo"),
     }
     await api.post("/task", taskDto).then((response) => {
       if(tasks){
@@ -18,32 +18,38 @@ export default function Home() {
         setTasks([...tasks, response.data])
       }
     });
+    
 
   }
+  useEffect(() => {
+    console.log(tasks)
+  },[tasks])
   const deleteTask = async (id: number) => {
     console.log(id)
     await api.delete(`/task/${id}`).then((response) => {
       if (response.status === 204) {
-        setTasks(tasks?.filter((task) => task.id !== id))
+        setTasks(tasks?.filter((task) => task.idTask !== id))
       }
     })
   }
   useEffect(() => {
     api.get("/task").then((response) => {
+      console.log(response.data)
       if(tasks){
+        console.log("Entrou if")
         setTasks([...tasks, response.data])
 
       }else{
+        console.log("Entrou else")
         setTasks(response.data)
       }
     })
-    console.log(tasks)
   }, [])
   const renderTasks = () => {
     return (
       tasks?.map((task) => {
         return (
-          <div key={task.id} className="flex justify-between w-full bg-slate-400 rounded">
+          <div key={task.idTask} className="flex justify-between w-full bg-slate-400 rounded">
             <h1 className="text-lg font-bold ml-3">{task.titulo}</h1>
             {/* <div className="flex flex-col gap-4">
                       {task.files.map((file)=>{
@@ -54,10 +60,12 @@ export default function Home() {
                               </div>
                           )
                       })}
-                  </div> */}
+                  </div> */}  
             <div className="flex items-center gap-3 mr-3">
-              <FiUpload />
-              <FaTrash onClick={()=>deleteTask(task.id)}/>
+                
+                <label htmlFor="file"><FiUpload /></label>
+                <input type="file" id="file" className="hidden" name="multipartFile"/>
+              <FaTrash onClick={()=>deleteTask(task.idTask)}/>
             </div>
           </div>
         )
