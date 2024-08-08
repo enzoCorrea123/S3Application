@@ -55,14 +55,17 @@ public class FileService implements FileServiceInt {
                 file.setRef(key);
                 file.setData(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 file.setTask(task);
+                System.out.println(file);
                 java.io.File arquivoJava = java.io.File.createTempFile("tmp", multipartFile.getOriginalFilename());
                 multipartFile.transferTo(arquivoJava);
                 amazonS3.putObject(config.getAwsBuketName(), key, arquivoJava);
                 List<File> tempFiles = task.getFiles();
+                file = repository.save(file);
+                System.out.println(file);
                 tempFiles.add(file);
                 task.setFiles(tempFiles);
                 taskRepository.save(task);
-                return repository.save(file);
+                return file;
             } else {
                 throw new RuntimeException("Não entrou no if");
             }

@@ -8,6 +8,7 @@ import api from "@/utils/Axios/Axios"
 export default function Home() {
   const router = useRouter();
   const [tasks, setTasks] = useState<Array<TaskGetInterface>>();
+  const [image, setImage] = useState<File>();
   const postTask = async (data: FormData) => {
     const taskDto = {
       titulo: data.get("titulo"),
@@ -20,6 +21,15 @@ export default function Home() {
     });
     
 
+  }
+  const postFile = async (image : any, idTask : number) => {
+    console.log(idTask)
+    console.log(image.target.files[0])
+    const formData = new FormData();
+    formData.append("multipartFile", image.target.files[0])
+    await api.post(`/file/${idTask}`, formData).then((response)=>{
+      console.log(response.data)
+    })
   }
   useEffect(() => {
     console.log(tasks)
@@ -64,7 +74,7 @@ export default function Home() {
             <div className="flex items-center gap-3 mr-3">
                 
                 <label htmlFor="file"><FiUpload /></label>
-                <input type="file" id="file" className="hidden" name="multipartFile"/>
+                <input type="file" id="file" className="hidden" onChange={(image)=>postFile(image, task.idTask)} name="multipartFile"/>
               <FaTrash onClick={()=>deleteTask(task.idTask)}/>
             </div>
           </div>
