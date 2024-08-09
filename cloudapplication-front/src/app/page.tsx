@@ -3,37 +3,44 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FiUpload } from "react-icons/fi";
 import { FaTrash } from "react-icons/fa";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "@/utils/Axios/Axios"
 export default function Home() {
   const router = useRouter();
   const [tasks, setTasks] = useState<Array<TaskGetInterface>>();
-  const [image, setImage] = useState<File>();
+  const [image, setImage] = useState<Array<string>>();
+  const ref = useRef<HTMLDialogElement>(null);
   const postTask = async (data: FormData) => {
     const taskDto = {
       titulo: data.get("titulo"),
     }
     await api.post("/task", taskDto).then((response) => {
-      if(tasks){
+      if (tasks) {
         console.log(response.data)
         setTasks([...tasks, response.data])
       }
     });
-    
+
 
   }
-  const postFile = async (image : any, idTask : number) => {
+  const postFile = async (image: any, idTask: number) => {
     console.log(idTask)
     console.log(image.target.files[0])
     const formData = new FormData();
     formData.append("multipartFile", image.target.files[0])
-    await api.post(`/file/${idTask}`, formData).then((response)=>{
+    await api.post(`/file/${idTask}`, formData).then((response) => {
       console.log(response.data)
     })
   }
+  const getFile = async (idTask: number) => {
+    await api.get(`/file/${idTask}`).then((response) => {
+      setImage(response.data)
+    })
+    ref.current?.showModal()
+  }
   useEffect(() => {
     console.log(tasks)
-  },[tasks])
+  }, [tasks])
   const deleteTask = async (id: number) => {
     console.log(id)
     await api.delete(`/task/${id}`).then((response) => {
@@ -45,11 +52,11 @@ export default function Home() {
   useEffect(() => {
     api.get("/task").then((response) => {
       console.log(response.data)
-      if(tasks){
+      if (tasks) {
         console.log("Entrou if")
         setTasks([...tasks, response.data])
 
-      }else{
+      } else {
         console.log("Entrou else")
         setTasks(response.data)
       }
@@ -60,7 +67,7 @@ export default function Home() {
       tasks?.map((task) => {
         return (
           <div key={task.idTask} className="flex justify-between w-full bg-slate-400 rounded">
-            <h1 className="text-lg font-bold ml-3">{task.titulo}</h1>
+            <h1 className="text-lg font-bold ml-3" onClick={() => getFile(task.idTask)}>{task.titulo}</h1>
             {/* <div className="flex flex-col gap-4">
                       {task.files.map((file)=>{
                           return(
@@ -70,16 +77,27 @@ export default function Home() {
                               </div>
                           )
                       })}
-                  </div> */}  
+                  </div> */}
             <div className="flex items-center gap-3 mr-3">
-                
-                <label htmlFor="file"><FiUpload /></label>
-                <input type="file" id="file" className="hidden" onChange={(image)=>postFile(image, task.idTask)} name="multipartFile"/>
-              <FaTrash onClick={()=>deleteTask(task.idTask)}/>
+
+              <label htmlFor={`file-${task.idTask}`}><FiUpload /></label>
+              <input type="file" id={`file-${task.idTask}`} className="hidden"
+                onChange={(image) => postFile(image, task.idTask)} name="multipartFile" />
+              <FaTrash onClick={() => deleteTask(task.idTask)} />
             </div>
           </div>
         )
       })
+    )
+  }
+  const renderFiles = () => {
+    return (
+      image?.map((ref) => {
+        return (
+          <Image src={ref} alt={"imagem"} width={100} height={100} />
+        )
+      }
+      )
     )
   }
   return (
@@ -102,6 +120,10 @@ export default function Home() {
           {renderTasks()}
         </div>
       </div>
+      <dialog ref={ref}>
+        {renderFiles()}
+        <button onClick={() => ref.current?.close()}>Fechar</button>
+      </dialog>
     </main>
   );
 }

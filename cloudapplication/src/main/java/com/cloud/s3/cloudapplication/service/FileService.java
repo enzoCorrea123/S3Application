@@ -26,9 +26,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.InputStream;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -45,26 +43,25 @@ public class FileService implements FileServiceInt {
 
         try {
             String key = UUID.randomUUID().toString();
-            AWSCredentials credentials = new BasicAWSCredentials(config.getAwsKeyID(), config.getAwsSecretKeyID());
-            AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_1).build();
-
+            AmazonS3 amazonS3 = getAmazonS3();
             if (amazonS3.doesBucketExistV2(config.getAwsBuketName())) {
                 file = new File();
                 Task task = taskService.getTask(id);
                 file.setRef(key);
                 file.setData(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 file.setTask(task);
-                System.out.println(file);
+
                 java.io.File arquivoJava = java.io.File.createTempFile("tmp", multipartFile.getOriginalFilename());
                 multipartFile.transferTo(arquivoJava);
+
                 amazonS3.putObject(config.getAwsBuketName(), key, arquivoJava);
+
                 List<File> tempFiles = task.getFiles();
                 file = repository.save(file);
-                System.out.println(file);
                 tempFiles.add(file);
                 task.setFiles(tempFiles);
                 taskRepository.save(task);
+
                 return file;
             } else {
                 throw new RuntimeException("Não entrou no if");
@@ -75,29 +72,56 @@ public class FileService implements FileServiceInt {
         } catch (Exception e) {
             throw new RuntimeException("Erro no código: " + e.getMessage());
         }
-
-
     }
 
     @Override
     public String getFile(Integer idTask, Integer idFile) {
-        AWSCredentials credentials = new BasicAWSCredentials(config.getAwsKeyID(), config.getAwsSecretKeyID());
-        AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_1).build();
+        AmazonS3 amazonS3 = getAmazonS3();
+        List<S3ObjectSummary> objects = getListObjects();
 
-        ListObjectsV2Result result = amazonS3.listObjectsV2(config.getAwsBuketName());
-        List<S3ObjectSummary> objects = result.getObjectSummaries();
         File fileTmp = repository.findById(idFile).get();
         File file = taskRepository.findById(idTask).get().getFiles().get(fileTmp.getIdFile()-1);
+
         String urlImage = null;
         for (S3ObjectSummary os : objects) {
             if (file.getRef().equals(os.getKey())) {
                 urlImage =  os.getKey();
             }
         }
+
         GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(config.getAwsBuketName(), urlImage);
         generatePresignedUrlRequest.withMethod(HttpMethod.GET).withExpiration(new Date(System.currentTimeMillis() + 3600000));
 
         return amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
+    }
+
+    @Override
+    public List<String> getAllFiles(Integer idTask) {
+        AmazonS3 amazonS3 = getAmazonS3();
+        List<S3ObjectSummary> objects = getListObjects();
+        List<String> urls = new LinkedList<>();
+        List<File> files = repository.findAllByTask_IdTask(idTask);
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest;
+        for (File file : files) {
+            for (S3ObjectSummary os : objects) {
+                if (file.getRef().equals(os.getKey())) {
+                    generatePresignedUrlRequest = new GeneratePresignedUrlRequest(config.getAwsBuketName(), os.getKey());
+                    generatePresignedUrlRequest.withMethod(HttpMethod.GET).withExpiration(new Date(System.currentTimeMillis() + 3600000));
+                    urls.add(amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString());
+                }
+            }
+        }
+        return urls;
+    }
+    private AmazonS3 getAmazonS3() {
+        AWSCredentials credentials = new BasicAWSCredentials(config.getAwsKeyID(), config.getAwsSecretKeyID());
+        return AmazonS3ClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_1).build();
+    }
+    private List<S3ObjectSummary> getListObjects() {
+        AmazonS3 amazonS3 = getAmazonS3();
+        ListObjectsV2Result result = amazonS3.listObjectsV2(config.getAwsBuketName());
+        return result.getObjectSummaries();
     }
 }

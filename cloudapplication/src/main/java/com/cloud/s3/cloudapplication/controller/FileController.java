@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/file")
 @AllArgsConstructor
@@ -25,5 +27,9 @@ public class FileController {
     @GetMapping("/{idTask}/{idFile}")
     public ResponseEntity<String> getMethod(@PathVariable Integer idTask, @PathVariable Integer idFile){
         return ResponseEntity.ok(service.getFile(idTask, idFile));
+    }
+    @GetMapping("/{idTask}")
+    public ResponseEntity<List<String>> getAllFiles(@PathVariable Integer idTask){
+        return ResponseEntity.ok(service.getAllFiles(idTask));
     }
 }
