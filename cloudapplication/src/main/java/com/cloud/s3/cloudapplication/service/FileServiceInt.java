@@ -12,4 +12,5 @@ public interface FileServiceInt {
     File cadastrar(MultipartFile multipartFile, Integer id);
     String getFile(Integer idTask, Integer idFile);
     List<String> getAllFiles(Integer idTask);
+    String deleteFile(Integer idFile);
 }

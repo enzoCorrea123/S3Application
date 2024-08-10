@@ -5,6 +5,9 @@ import { FiUpload } from "react-icons/fi";
 import { FaTrash } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import api from "@/utils/Axios/Axios"
+import { IoIosCloseCircleOutline } from "react-icons/io";
+import { IoIosCloseCircle } from "react-icons/io";
+import { IoClose } from "react-icons/io5";
 export default function Home() {
   const router = useRouter();
   const [tasks, setTasks] = useState<Array<TaskGetInterface>>();
@@ -38,6 +41,14 @@ export default function Home() {
     })
     ref.current?.showModal()
   }
+  const deleteFile = async(idFile : number)=>{
+    console.log(idFile)
+    await api.delete(`/file/${idFile}`).then((response)=>{
+      if(response.status === 204){
+        setImage(image?.filter((image,index)=>index !== idFile))
+      }
+    })
+  }
   useEffect(() => {
     console.log(tasks)
   }, [tasks])
@@ -67,7 +78,7 @@ export default function Home() {
       tasks?.map((task) => {
         return (
           <div key={task.idTask} className="flex justify-between w-full bg-slate-400 rounded">
-            <h1 className="text-lg font-bold ml-3" onClick={() => getFile(task.idTask)}>{task.titulo}</h1>
+            <h1 className="text-lg font-bold ml-3 cursor-pointer" onClick={() => getFile(task.idTask)}>{task.titulo}</h1>
             {/* <div className="flex flex-col gap-4">
                       {task.files.map((file)=>{
                           return(
@@ -92,9 +103,13 @@ export default function Home() {
   }
   const renderFiles = () => {
     return (
-      image?.map((ref) => {
+      image?.map((ref, index) => {
         return (
-          <Image src={ref} alt={"imagem"} width={100} height={100} />
+          <div className="relative" key={index}>
+            <Image src={ref} alt={"imagem"} width={100} height={100} />
+            <IoClose className="absolute -top-1 -right-1 bg-[#ff2e26] rounded-full" color="#FFFFFF" size={20} onClick={()=>deleteFile(index)}/>
+          </div>
+
         )
       }
       )
@@ -120,9 +135,14 @@ export default function Home() {
           {renderTasks()}
         </div>
       </div>
-      <dialog ref={ref}>
-        {renderFiles()}
-        <button onClick={() => ref.current?.close()}>Fechar</button>
+      <dialog ref={ref} className="rounded">
+        <div className="p-3">
+          <h1 className="text-xl font-bold text-center">Imagens</h1>
+          <div className="flex justify-between items-center gap-3">
+            {renderFiles()}
+          </div>
+          <button onClick={() => ref.current?.close()} className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 my-2 px-4 border border-blue-500 rounded">Fechar</button>
+        </div>
       </dialog>
     </main>
   );

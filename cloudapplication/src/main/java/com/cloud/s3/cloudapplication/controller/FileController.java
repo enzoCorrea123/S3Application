@@ -32,4 +32,13 @@ public class FileController {
     public ResponseEntity<List<String>> getAllFiles(@PathVariable Integer idTask){
         return ResponseEntity.ok(service.getAllFiles(idTask));
     }
+    @DeleteMapping("/{idFile}")
+    public ResponseEntity<String> deleteMethod(@PathVariable Integer idFile){
+        try{
+            return new ResponseEntity<>(service.deleteFile(idFile), HttpStatus.NO_CONTENT);
+
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

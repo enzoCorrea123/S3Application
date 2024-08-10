@@ -114,6 +114,23 @@ public class FileService implements FileServiceInt {
         }
         return urls;
     }
+
+    @Override
+    public String deleteFile(Integer idFile) {
+        File file = repository.findById(idFile).get();
+        List<S3ObjectSummary> objects = getListObjects();
+        System.out.println(file);
+        for(S3ObjectSummary object : objects){
+            if(object.getKey().equals(file.getRef())){
+                AmazonS3 amazonS3 = getAmazonS3();
+                amazonS3.deleteObject(config.getAwsBuketName(), file.getRef());
+                repository.delete(file);
+                return "Arquivo deletado com sucesso";
+            }
+        }
+        throw new RuntimeException("Arquivo não encontrado");
+    }
+
     private AmazonS3 getAmazonS3() {
         AWSCredentials credentials = new BasicAWSCredentials(config.getAwsKeyID(), config.getAwsSecretKeyID());
         return AmazonS3ClientBuilder.standard()
