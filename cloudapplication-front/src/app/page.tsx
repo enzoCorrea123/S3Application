@@ -45,7 +45,7 @@ export default function Home() {
     console.log(idFile)
     await api.delete(`/file/${idFile}`).then((response)=>{
       if(response.status === 204){
-        setImage(image?.filter((image,index)=>index !== idFile))
+        setImage(image?.filter((file)=>file.idFile !== idFile))
       }
     })
   }
@@ -79,16 +79,6 @@ export default function Home() {
         return (
           <div key={task.idTask} className="flex justify-between w-full bg-slate-400 rounded">
             <h1 className="text-lg font-bold ml-3 cursor-pointer" onClick={() => getFile(task.idTask)}>{task.titulo}</h1>
-            {/* <div className="flex flex-col gap-4">
-                      {task.files.map((file)=>{
-                          return(
-                              <div key={file.id} className="flex flex-col gap-4">
-                                  <h1 className="text-lg font-bold">{file.nome}</h1>
-                                  <img src={file.url} alt={file.nome} className="w-1/4"/>
-                              </div>
-                          )
-                      })}
-                  </div> */}
             <div className="flex items-center gap-3 mr-3">
 
               <label htmlFor={`file-${task.idTask}`}><FiUpload /></label>
@@ -106,7 +96,6 @@ export default function Home() {
       image?.map((file) => {
         return (
           <div className="relative" key={file.idFile}>
-            <p>{file.idFile}</p>
             <Image src={file.ref} alt={"imagem"} width={100} height={100} />
             <IoClose className="absolute -top-1 -right-1 bg-[#ff2e26] rounded-full" color="#FFFFFF" size={20} onClick={()=>deleteFile(file.idFile)}/>
           </div>
