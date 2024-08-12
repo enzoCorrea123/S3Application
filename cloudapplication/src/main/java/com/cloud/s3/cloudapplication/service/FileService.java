@@ -13,11 +13,14 @@ import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.cloud.s3.cloudapplication.config.AwsConfig;
+import com.cloud.s3.cloudapplication.dto.FileRequestGetDTO;
+import com.cloud.s3.cloudapplication.dto.FileRequestPostDTO;
 import com.cloud.s3.cloudapplication.model.File;
 import com.cloud.s3.cloudapplication.model.Task;
 import com.cloud.s3.cloudapplication.repository.FileRepository;
 import com.cloud.s3.cloudapplication.repository.TaskRepository;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
@@ -96,13 +99,14 @@ public class FileService implements FileServiceInt {
     }
 
     @Override
-    public List<String> getAllFiles(Integer idTask) {
+    public List<FileRequestGetDTO> getAllFiles(Integer idTask) {
         AmazonS3 amazonS3 = getAmazonS3();
         List<S3ObjectSummary> objects = getListObjects();
         List<String> urls = new LinkedList<>();
         List<File> files = repository.findAllByTask_IdTask(idTask);
 
         GeneratePresignedUrlRequest generatePresignedUrlRequest;
+        List<Integer> ids = new ArrayList<>();
         for (File file : files) {
             for (S3ObjectSummary os : objects) {
                 if (file.getRef().equals(os.getKey())) {
@@ -111,8 +115,14 @@ public class FileService implements FileServiceInt {
                     urls.add(amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString());
                 }
             }
+            ids.add(file.getIdFile());
         }
-        return urls;
+
+        List<FileRequestGetDTO> fileRequestGetDTOS = new ArrayList<>();
+        for (int i = 0; i < urls.size(); i++) {
+            fileRequestGetDTOS.add(new FileRequestGetDTO(ids.get(i), urls.get(i)));
+        }
+        return fileRequestGetDTOS;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.cloud.s3.cloudapplication.service;
 
+import com.cloud.s3.cloudapplication.dto.FileRequestGetDTO;
 import com.cloud.s3.cloudapplication.dto.FileRequestPostDTO;
 import com.cloud.s3.cloudapplication.model.File;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,6 @@ import java.util.List;
 public interface FileServiceInt {
     File cadastrar(MultipartFile multipartFile, Integer id);
     String getFile(Integer idTask, Integer idFile);
-    List<String> getAllFiles(Integer idTask);
+    List<FileRequestGetDTO> getAllFiles(Integer idTask);
     String deleteFile(Integer idFile);
 }

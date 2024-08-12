@@ -1,5 +1,6 @@
 package com.cloud.s3.cloudapplication.controller;
 
+import com.cloud.s3.cloudapplication.dto.FileRequestGetDTO;
 import com.cloud.s3.cloudapplication.dto.FileRequestPostDTO;
 import com.cloud.s3.cloudapplication.model.File;
 import com.cloud.s3.cloudapplication.service.FileService;
@@ -19,26 +20,26 @@ import java.util.List;
 @CrossOrigin("*")
 public class FileController {
     private final FileService service;
+
     @PostMapping("/{id}")
-    public ResponseEntity<File> postMethod(@RequestBody MultipartFile multipartFile, @PathVariable Integer id){
+    public ResponseEntity<File> postMethod(@RequestBody MultipartFile multipartFile, @PathVariable Integer id) {
         File file = service.cadastrar(multipartFile, id);
         return ResponseEntity.ok(file);
     }
+
     @GetMapping("/{idTask}/{idFile}")
-    public ResponseEntity<String> getMethod(@PathVariable Integer idTask, @PathVariable Integer idFile){
+    public ResponseEntity<String> getMethod(@PathVariable Integer idTask, @PathVariable Integer idFile) {
         return ResponseEntity.ok(service.getFile(idTask, idFile));
     }
+
     @GetMapping("/{idTask}")
-    public ResponseEntity<List<String>> getAllFiles(@PathVariable Integer idTask){
+    public ResponseEntity<List<FileRequestGetDTO>> getAllFiles(@PathVariable Integer idTask) {
         return ResponseEntity.ok(service.getAllFiles(idTask));
     }
-    @DeleteMapping("/{idFile}")
-    public ResponseEntity<String> deleteMethod(@PathVariable Integer idFile){
-        try{
-            return new ResponseEntity<>(service.deleteFile(idFile), HttpStatus.NO_CONTENT);
 
-        }catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    @DeleteMapping("/{idFile}")
+    public ResponseEntity<String> deleteMethod(@PathVariable Integer idFile) {
+        return new ResponseEntity<>(service.deleteFile(idFile), HttpStatus.NO_CONTENT);
+
     }
 }

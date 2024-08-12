@@ -11,7 +11,7 @@ import { IoClose } from "react-icons/io5";
 export default function Home() {
   const router = useRouter();
   const [tasks, setTasks] = useState<Array<TaskGetInterface>>();
-  const [image, setImage] = useState<Array<string>>();
+  const [image, setImage] = useState<Array<FileGetInterface>>();
   const ref = useRef<HTMLDialogElement>(null);
   const postTask = async (data: FormData) => {
     const taskDto = {
@@ -103,11 +103,12 @@ export default function Home() {
   }
   const renderFiles = () => {
     return (
-      image?.map((ref, index) => {
+      image?.map((file) => {
         return (
-          <div className="relative" key={index}>
-            <Image src={ref} alt={"imagem"} width={100} height={100} />
-            <IoClose className="absolute -top-1 -right-1 bg-[#ff2e26] rounded-full" color="#FFFFFF" size={20} onClick={()=>deleteFile(index)}/>
+          <div className="relative" key={file.idFile}>
+            <p>{file.idFile}</p>
+            <Image src={file.ref} alt={"imagem"} width={100} height={100} />
+            <IoClose className="absolute -top-1 -right-1 bg-[#ff2e26] rounded-full" color="#FFFFFF" size={20} onClick={()=>deleteFile(file.idFile)}/>
           </div>
 
         )
