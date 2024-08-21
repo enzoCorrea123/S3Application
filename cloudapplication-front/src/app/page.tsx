@@ -8,71 +8,71 @@ import api from "@/utils/Axios/Axios"
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { IoIosCloseCircle } from "react-icons/io";
 import { IoClose } from "react-icons/io5";
+
+import * as functions from '../functions';
+
 export default function Home() {
   const router = useRouter();
   const [tasks, setTasks] = useState<Array<TaskGetInterface>>();
   const [image, setImage] = useState<Array<FileGetInterface>>();
   const ref = useRef<HTMLDialogElement>(null);
+
   const postTask = async (data: FormData) => {
-    const taskDto = {
-      titulo: data.get("titulo"),
-    }
-    await api.post("/task", taskDto).then((response) => {
-      if (tasks) {
-        console.log(response.data)
-        setTasks([...tasks, response.data])
-      }
+    await functions.postTask(data).then((response) => {
+      setTasks([tasks, response])
     });
 
 
   }
   const postFile = async (image: any, idTask: number) => {
-    console.log(idTask)
-    console.log(image.target.files[0])
-    const formData = new FormData();
-    formData.append("multipartFile", image.target.files[0])
-    await api.post(`/file/${idTask}`, formData).then((response) => {
-      console.log(response.data)
+    await functions.postFile(image, idTask).then((response) => {
+      console.log(response)
     })
   }
   const getFile = async (idTask: number) => {
-    await api.get(`/file/${idTask}`).then((response) => {
-      setImage(response.data)
+    await functions.getFile(idTask).then((response) => {
+      setImage(response)
+      ref.current?.showModal()
     })
-    ref.current?.showModal()
   }
-  const deleteFile = async(idFile : number)=>{
-    console.log(idFile)
-    await api.delete(`/file/${idFile}`).then((response)=>{
-      if(response.status === 204){
-        setImage(image?.filter((file)=>file.idFile !== idFile))
+  const deleteFile = async (idFile: number) => {
+    await functions.deleteFile(idFile).then((response) => {
+      if (response.status === 204) {
+        setImage(image?.filter((file) => file.idFile !== idFile))
+
       }
     })
   }
   useEffect(() => {
     console.log(tasks)
   }, [tasks])
+
   const deleteTask = async (id: number) => {
-    console.log(id)
-    await api.delete(`/task/${id}`).then((response) => {
+    await functions.deleteTask(id).then((response) => {
       if (response.status === 204) {
         setTasks(tasks?.filter((task) => task.idTask !== id))
       }
     })
   }
-  useEffect(() => {
-    api.get("/task").then((response) => {
-      console.log(response.data)
+
+  const getTask = async () => {
+   await functions.getTask().then((response) => {
+      console.log(response)
       if (tasks) {
         console.log("Entrou if")
-        setTasks([...tasks, response.data])
+        setTasks([...tasks, response])
 
       } else {
         console.log("Entrou else")
-        setTasks(response.data)
+        setTasks(response)
       }
     })
+  }
+
+  useEffect(() => {
+    getTask();
   }, [])
+
   const renderTasks = () => {
     return (
       tasks?.map((task) => {
@@ -97,7 +97,7 @@ export default function Home() {
         return (
           <div className="relative" key={file.idFile}>
             <Image src={file.ref} alt={"imagem"} width={100} height={100} />
-            <IoClose className="absolute -top-1 -right-1 bg-[#ff2e26] rounded-full" color="#FFFFFF" size={20} onClick={()=>deleteFile(file.idFile)}/>
+            <IoClose className="absolute -top-1 -right-1 bg-[#ff2e26] rounded-full" color="#FFFFFF" size={20} onClick={() => deleteFile(file.idFile)} />
           </div>
 
         )
