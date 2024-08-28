@@ -10,6 +10,7 @@ import { IoIosCloseCircle } from "react-icons/io";
 import { IoClose } from "react-icons/io5";
 
 import * as functions from '../functions';
+import { get } from "http";
 
 export default function Home() {
   const router = useRouter();
@@ -20,12 +21,16 @@ export default function Home() {
   const postTask = async (data: FormData) => {
     await functions.postTask(data).then((response) => {
       setTasks([tasks, response])
+      getTask();
     });
 
 
   }
   const postFile = async (image: any, idTask: number) => {
-    await functions.postFile(image, idTask).then((response) => {
+    console.log("Post File ", image)
+    const formData = new FormData();
+    formData.append("multipartFile", image.target.files[0])
+    await functions.postFile(formData, idTask).then((response) => {
       console.log(response)
     })
   }
@@ -43,30 +48,31 @@ export default function Home() {
       }
     })
   }
-  useEffect(() => {
-    console.log(tasks)
-  }, [tasks])
 
   const deleteTask = async (id: number) => {
+    console.log("Entrou deleteTask")
     await functions.deleteTask(id).then((response) => {
       if (response.status === 204) {
         setTasks(tasks?.filter((task) => task.idTask !== id))
+        getTask();
       }
     })
   }
 
   const getTask = async () => {
+    console.log("Entrou getTask")
    await functions.getTask().then((response) => {
       console.log(response)
-      if (tasks) {
-        console.log("Entrou if")
-        setTasks([...tasks, response])
+      // if (tasks) {
+      //   console.log("Entrou if")
+      //   setTasks([...tasks, response])
 
-      } else {
+      // } else {
         console.log("Entrou else")
         setTasks(response)
       }
-    })
+    // }
+    )
   }
 
   useEffect(() => {

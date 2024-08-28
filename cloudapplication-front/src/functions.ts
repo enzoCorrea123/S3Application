@@ -8,10 +8,8 @@ export const postTask = async (data: FormData) => {
     const response = await api.post("/task", taskDto)
     return response.data;
 }
-export const postFile = async (image: any, idTask: number) => {
-    const formData = new FormData();
-    formData.append("multipartFile", image.target.files[0])
-    const response = await api.post(`/file/${idTask}`, formData)
+export const postFile = async (data: FormData, idTask: number) => {
+    const response = await api.post(`/file/${idTask}`, data)
     return response.data;
 }
 export  const getFile = async (idTask: number) => {
