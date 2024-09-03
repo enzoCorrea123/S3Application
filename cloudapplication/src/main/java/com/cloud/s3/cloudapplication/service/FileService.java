@@ -13,6 +13,7 @@ import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.cloud.s3.cloudapplication.config.AwsConfig;
+import com.cloud.s3.cloudapplication.config.KafkaProducerConfig;
 import com.cloud.s3.cloudapplication.dto.FileRequestGetDTO;
 import com.cloud.s3.cloudapplication.dto.FileRequestPostDTO;
 import com.cloud.s3.cloudapplication.model.File;
@@ -21,6 +22,10 @@ import com.cloud.s3.cloudapplication.repository.FileRepository;
 import com.cloud.s3.cloudapplication.repository.TaskRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
@@ -30,6 +35,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 import java.io.InputStream;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @AllArgsConstructor
@@ -38,12 +44,30 @@ public class FileService implements FileServiceInt {
     TaskRepository taskRepository;
     TaskService taskService;
     AwsConfig config;
+    KafkaProducerConfig kafkaProducerConfig;
+    private KafkaTemplate<String, String> kafkaTemplate;
+    @KafkaListener(topics = "topic_enzo2", groupId = "my-group")
+    public void listenGroupMyGroup(String message) {
+        System.out.println("Mensagem recebida no grupo my-group: " + message);
+    }
+
+    public void sendMessage(String message) {
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("topic_enzo2", message);
+        future.whenComplete((result, ex) -> {
+            if (ex == null) {
+                System.out.println("Mensagem enviada=[" + message +
+                        "] com offset=[" + result.getRecordMetadata().offset() + "]");
+            } else {
+                System.out.println("Mensagem não enviada=[" +
+                        message + "] por casa do : " + ex.getMessage());
+            }
+        });
+    }
 
 
     @Override
     public File cadastrar(MultipartFile multipartFile, Integer id) {
         File file;
-
         try {
             String key = UUID.randomUUID().toString();
             AmazonS3 amazonS3 = getAmazonS3();
@@ -64,7 +88,8 @@ public class FileService implements FileServiceInt {
                 tempFiles.add(file);
                 task.setFiles(tempFiles);
                 taskRepository.save(task);
-
+                //kafka producer
+                sendMessage("Arquivo " + file.getIdFile() + " adicionado na task " + task.getIdTask());
                 return file;
             } else {
                 throw new RuntimeException("Não entrou no if");
@@ -122,6 +147,8 @@ public class FileService implements FileServiceInt {
         for (int i = 0; i < urls.size(); i++) {
             fileRequestGetDTOS.add(new FileRequestGetDTO(ids.get(i), urls.get(i)));
         }
+        //kafka consumer
+        listenGroupMyGroup("Arquivos da task " + idTask + " foram listados");
         return fileRequestGetDTOS;
     }
 

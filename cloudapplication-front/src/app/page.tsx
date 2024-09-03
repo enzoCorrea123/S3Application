@@ -31,7 +31,7 @@ export default function Home() {
     const formData = new FormData();
     formData.append("multipartFile", image.target.files[0])
     await functions.postFile(formData, idTask).then((response) => {
-      console.log(response)
+      functions.kafkaMessages();
     })
   }
   const getFile = async (idTask: number) => {

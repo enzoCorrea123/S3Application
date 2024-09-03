@@ -28,3 +28,7 @@ export const getTask = async () => {
     const response = await api.get("/task")
     return response.data;
 }
+export const kafkaMessages = async ()=>{
+    const response = await api.get("/consumer/messages")
+    return response.data;
+}
