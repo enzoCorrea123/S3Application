@@ -45,11 +45,12 @@ public class FileService implements FileServiceInt {
     TaskService taskService;
     AwsConfig config;
     KafkaProducerConfig kafkaProducerConfig;
+    ConsumerService consumerService;
     private KafkaTemplate<String, String> kafkaTemplate;
-    @KafkaListener(topics = "topic_enzo2", groupId = "my-group")
-    public void listenGroupMyGroup(String message) {
-        System.out.println("Mensagem recebida no grupo my-group: " + message);
-    }
+//    @KafkaListener(topics = "topic_enzo2", groupId = "my-group")
+//    public void listenGroupMyGroup(String message) {
+//        System.out.println("Mensagem recebida no grupo my-group: " + message);
+//    }
 
     public void sendMessage(String message) {
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("topic_enzo2", message);
@@ -147,8 +148,7 @@ public class FileService implements FileServiceInt {
         for (int i = 0; i < urls.size(); i++) {
             fileRequestGetDTOS.add(new FileRequestGetDTO(ids.get(i), urls.get(i)));
         }
-        //kafka consumer
-        listenGroupMyGroup("Arquivos da task " + idTask + " foram listados");
+
         return fileRequestGetDTOS;
     }
 
